@@ -2,15 +2,15 @@
   <div class="login-container">
     <div class="login-box" :class="{ 'shake': error }">
       <div class="header">
-        <h1>Welcome Back</h1>
-        <p class="subtitle">Please sign in to continue</p>
+        <h1>Electron Data Record</h1>
+        <p class="subtitle">{{ subtitle }}</p>
       </div>
 
       <form @submit.prevent="login">
         <div class="form-group" :class="{ 'focused': isFocused.username }">
           <label for="username">
             <i class="fas fa-user"></i>
-            Username
+            {{ Username }}
           </label>
           <input type="text" id="username" v-model="username" @focus="isFocused.username = true"
             @blur="isFocused.username = false" required />
@@ -19,119 +19,88 @@
         <div class="form-group" :class="{ 'focused': isFocused.password }">
           <label for="password">
             <i class="fas fa-lock"></i>
-            Password
+            {{ Password }}
           </label>
           <div class="password-input">
             <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password"
               @focus="isFocused.password = true" @blur="isFocused.password = false" required />
-            <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'" @click="showPassword = !showPassword"></i>
+            <i class="fas password-toggle" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="showPassword = !showPassword"></i>
           </div>
         </div>
 
-        <div class="options">
-          <label class="remember-me">
-            <input type="checkbox" v-model="rememberMe">
-            <span>Remember me</span>
-          </label>
-          <a href="#" class="forgot-password">Forgot Password?</a>
-        </div>
-
-        <button type="submit" :disabled="isLoading">
-          <span v-if="!isLoading">Sign In</span>
+        <button type="submit" :disabled="isLoading" class="submit-btn">
+          <span v-if="!isLoading">{{ SignIn }}</span>
           <span v-else class="loading-spinner"></span>
         </button>
       </form>
 
-      <transition name="fade">
+      <Transition name="fade">
         <p v-if="error" class="error-message">
           <i class="fas fa-exclamation-circle"></i>
           {{ error }}
         </p>
-      </transition>
-
-      <div class="divider">
-        <span>or continue with</span>
-      </div>
-
-      <div class="social-login">
-        <button class="social-btn google">
-          <i class="fab fa-google"></i>
-        </button>
-        <button class="social-btn facebook">
-          <i class="fab fa-facebook-f"></i>
-        </button>
-        <button class="social-btn twitter">
-          <i class="fab fa-twitter"></i>
-        </button>
-      </div>
-
-      <p class="signup-link">
-        Don't have an account? <a href="#">Sign up</a>
-      </p>
+      </Transition>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      error: null,
-      showPassword: false,
-      rememberMe: false,
-      isLoading: false,
-      isFocused: {
-        username: false,
-        password: false
-      }
-    }
-  },
-  methods: {
-    async login() {
-      this.isLoading = true;
-      this.error = null;
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+const router = useRouter()
+const username = ref('')
+const password = ref('')
+const error = ref(null)
+const showPassword = ref(false)
+const isLoading = ref(false)
+const isFocused = reactive({
+  username: false,
+  password: false
+})
 
-        if (this.username === 'admin' && this.password === 'admin') {
-          this.$router.push({ name: 'home' });
-        } else {
-          throw new Error('Invalid credentials');
-        }
-      } catch (err) {
-        this.error = 'Invalid username or password!';
-      } finally {
-        this.isLoading = false;
-      }
+// Thai language constants
+const subtitle = "กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบ"
+const Username = "ชื่อผู้ใช้"
+const Password = "รหัสผ่าน"
+const SignIn = "เข้าสู่ระบบ"
+
+const login = async () => {
+  isLoading.value = true
+  error.value = null
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    if (username.value === 'admin' && password.value === 'admin') {
+      router.push({ name: 'home' })
+    } else {
+      throw new Error('Invalid credentials')
     }
+  } catch (err) {
+    error.value = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
 
 <style scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
 
 .login-box {
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
+  padding: 40px;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  padding: 40px;
   width: 100%;
-  max-width: 420px;
-  transition: all 0.3s ease;
+  max-width: 400px;
 }
 
 .header {
@@ -140,44 +109,39 @@ export default {
 }
 
 h1 {
-  color: #333;
-  font-size: 28px;
-  margin-bottom: 8px;
+  color: #2d3748;
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
 .subtitle {
-  color: #666;
+  color: #718096;
   font-size: 16px;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 25px;
   position: relative;
 }
 
-.form-group label {
+label {
   display: block;
   margin-bottom: 8px;
-  color: #555;
+  color: #4a5568;
   font-size: 14px;
-  transition: all 0.3s ease;
 }
 
-.form-group i {
+label i {
   margin-right: 8px;
-  color: #666;
-}
-
-.form-group.focused label {
   color: #667eea;
 }
 
 input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e1e1;
+  padding: 12px 15px;
+  border: 2px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 16px;
   transition: all 0.3s ease;
 }
 
@@ -191,61 +155,48 @@ input:focus {
   position: relative;
 }
 
-.password-input i {
+.password-toggle {
   position: absolute;
-  right: 16px;
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: #666;
+  color: #718096;
 }
 
-.options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #666;
-}
-
-.forgot-password {
-  color: #667eea;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-button {
+.submit-btn {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 12px;
+  background: #667eea;
   color: white;
   border: none;
   border-radius: 10px;
-  cursor: pointer;
   font-size: 16px;
-  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+.submit-btn:hover {
+  background: #5a67d8;
 }
 
-button:disabled {
-  opacity: 0.7;
+.submit-btn:disabled {
+  background: #a0aec0;
   cursor: not-allowed;
 }
 
+.error-message {
+  color: #e53e3e;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.error-message i {
+  margin-right: 8px;
+}
+
+/* Loading Spinner */
 .loading-spinner {
   display: inline-block;
   width: 20px;
@@ -262,20 +213,9 @@ button:disabled {
   }
 }
 
-.error-message {
-  background-color: #fff2f0;
-  color: #ff4d4f;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
+/* Shake Animation */
 .shake {
-  animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
+  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes shake {
@@ -302,6 +242,7 @@ button:disabled {
   }
 }
 
+/* Fade Transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -312,80 +253,18 @@ button:disabled {
   opacity: 0;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 24px 0;
-}
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 20px;
+  }
 
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e1e1e1;
-}
+  h1 {
+    font-size: 20px;
+  }
 
-.divider span {
-  padding: 0 16px;
-  color: #666;
-  font-size: 14px;
-}
-
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.social-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #e1e1e1;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-.social-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-}
-
-.social-btn i {
-  font-size: 20px;
-}
-
-.google i {
-  color: #DB4437;
-}
-
-.facebook i {
-  color: #4267B2;
-}
-
-.twitter i {
-  color: #1DA1F2;
-}
-
-.signup-link {
-  text-align: center;
-  margin-top: 24px;
-  color: #666;
-  font-size: 14px;
-}
-
-.signup-link a {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.signup-link a:hover {
-  text-decoration: underline;
+  .subtitle {
+    font-size: 14px;
+  }
 }
 </style>
